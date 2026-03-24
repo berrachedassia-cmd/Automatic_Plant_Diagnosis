@@ -1,32 +1,40 @@
-# model.py
 import tensorflow as tf
 from keras import layers, models
 
 def build_cnn_model(num_classes, input_shape=(128,128,3)):
 
-    model = models.Sequential()
+    # ==========================================================
+    # LOAD PRETRAINED MODEL (TRANSFER LEARNING)
+    # ==========================================================
+    base_model = tf.keras.applications.MobileNetV2(
+        input_shape=input_shape,
+        include_top=False,   # Remove original classifier
+        weights='imagenet'   # Use pretrained weights
+    )
 
-    # Bloc 1
-    model.add(layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape))
-    model.add(layers.BatchNormalization())
-    model.add(layers.MaxPooling2D((2,2)))
+    # Freeze base model → prevents weights from being updated
+    base_model.trainable = False
 
-    # Bloc 2
-    model.add(layers.Conv2D(64, (3,3), activation='relu'))
-    model.add(layers.BatchNormalization())
-    model.add(layers.MaxPooling2D((2,2)))
+    # ==========================================================
+    # BUILD CUSTOM CLASSIFIER
+    # ==========================================================
+    model = models.Sequential([
+        base_model,
 
-    # Bloc 3
-    model.add(layers.Conv2D(128, (3,3), activation='relu'))
-    model.add(layers.BatchNormalization())
-    model.add(layers.MaxPooling2D((2,2)))
+        # Convert feature maps → vector
+        layers.GlobalAveragePooling2D(),
 
-    # Global Average Pooling
-    model.add(layers.GlobalAveragePooling2D())
+        # Normalize activations
+        layers.BatchNormalization(),
 
-    # Dense layers
-    model.add(layers.Dense(128, activation='relu'))
-    model.add(layers.Dropout(0.5))
-    model.add(layers.Dense(num_classes, activation='softmax'))
+        # Fully connected layer
+        layers.Dense(128, activation='relu'),
+
+        # Regularization to prevent overfitting
+        layers.Dropout(0.5),
+
+        # Final classification layer
+        layers.Dense(num_classes, activation='softmax')
+    ])
 
     return model

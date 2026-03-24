@@ -1,13 +1,14 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import config
 
-dataset_path = "data/raw/plantvillage_dataset/color"
+DATASET_PATH = config.DATASET_PATH
 
 IMAGE_SIZE = (128, 128)
 BATCH_SIZE = 32
 
 train_dataset = tf.keras.utils.image_dataset_from_directory(
-    dataset_path,
+    DATASET_PATH,
     validation_split=0.2,
     subset="training",
     seed=42,

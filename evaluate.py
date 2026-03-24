@@ -8,11 +8,11 @@ from config import MODEL_FILE
 model = tf.keras.models.load_model(MODEL_FILE)
 
 # Load dataset
-_, val_dataset, class_names, _ = load_datasets()
+_, _, test_dataset, class_names, _ = load_datasets()
 
 y_true, y_pred = [], []
 
-for images, labels in val_dataset:
+for images, labels in test_dataset:
     preds = model.predict(images, verbose=0)
     y_true.extend(labels.numpy())
     y_pred.extend(np.argmax(preds, axis=1))
